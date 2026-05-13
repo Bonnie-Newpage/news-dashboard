@@ -189,6 +189,54 @@ background: rgba(255,255,255,0.04);
 border-left: 2px solid rgba(96,165,250,0.4);
 }
 
+/* ── 摘要卡片 ── */
+.summary-wrap {
+padding: 0 28px 0; margin-bottom: 4px;
+}
+@media (max-width: 768px) { .summary-wrap { padding: 0 16px; } }
+
+.summary-card {
+background: linear-gradient(135deg, rgba(34,197,94,0.06), rgba(96,165,250,0.06));
+border: 1px solid rgba(34,197,94,0.2);
+border-radius: 18px; overflow: hidden;
+transition: all .3s;
+}
+.summary-header {
+padding: 14px 20px;
+display: flex; justify-content: space-between; align-items: center;
+cursor: pointer; user-select: none;
+}
+.summary-header:hover { background: rgba(255,255,255,0.03); }
+.summary-title-row { display: flex; align-items: center; gap: 10px; }
+.summary-title { font-size: 15px; font-weight: 700; color: #f1f5f9; font-family: var(–serif); }
+.summary-badge {
+font-size: 10px; padding: 2px 8px; border-radius: 8px;
+background: rgba(34,197,94,0.15); color: var(–green); font-weight: 700;
+}
+.summary-toggle { font-size: 12px; color: var(–muted); transition: transform .3s; }
+.summary-toggle.open { transform: rotate(180deg); }
+.summary-body {
+padding: 0 20px 18px;
+display: none;
+}
+.summary-body.open { display: block; animation: fadeUp .3s ease; }
+.summary-text {
+font-size: 14px; line-height: 1.9; color: #cbd5e1;
+font-family: var(–serif); white-space: pre-wrap;
+}
+.summary-loading {
+display: flex; align-items: center; gap: 10px;
+font-size: 13px; color: var(–muted); padding: 4px 0;
+}
+.summary-spinner {
+width: 16px; height: 16px; border-radius: 50%;
+border: 2px solid rgba(34,197,94,0.2);
+border-top-color: var(–green);
+animation: spin 1s linear infinite; flex-shrink: 0;
+}
+.summary-error { font-size: 12px; color: #ef4444; padding: 4px 0; }
+.summary-meta { font-size: 10px; color: var(–dim); margin-top: 10px; font-family: var(–mono); }
+
 /* ── Skeleton loading ── */
 .skeleton {
 background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
@@ -266,6 +314,32 @@ border: 1px solid rgba(239,68,68,0.2);
     <div>
       <div class="stat-label">今日日期</div>
       <div class="stat-value" id="todayDate" style="color:#a78bfa">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- Summary -->
+
+<div class="summary-wrap">
+  <div class="summary-card">
+    <div class="summary-header" onclick="toggleSummary()">
+      <div class="summary-title-row">
+        <span style="font-size:18px">📊</span>
+        <span class="summary-title">今日財經市場摘要</span>
+        <span class="summary-badge" id="summaryBadge">AI 生成</span>
+      </div>
+      <span class="summary-toggle" id="summaryToggle">▼</span>
+    </div>
+    <div class="summary-body" id="summaryBody">
+      <div class="summary-loading" id="summaryLoading">
+        <div class="summary-spinner"></div>
+        <span>Gemini AI 正在閱讀新聞並生成摘要，約需 10-15 秒…</span>
+      </div>
+      <div id="summaryText" style="display:none">
+        <div class="summary-text" id="summaryContent"></div>
+        <div class="summary-meta" id="summaryMeta"></div>
+      </div>
+      <div class="summary-error" id="summaryError" style="display:none"></div>
     </div>
   </div>
 </div>
@@ -459,6 +533,107 @@ async function loadAll() {
 
 // 自動載入
 loadAll();
+
+// ═══════════════════════════════════════
+// 摘要功能
+// ═══════════════════════════════════════
+const GEMINI_KEY = "AIzaSyDN3LiPmOrrkHVKNLonCxjI0yo4J9v1s7Y";
+const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + GEMINI_KEY;
+
+let summaryOpen = false;
+let summaryGenerated = false;
+
+function toggleSummary() {
+  summaryOpen = !summaryOpen;
+  const body    = document.getElementById("summaryBody");
+  const toggle  = document.getElementById("summaryToggle");
+  body.classList.toggle("open", summaryOpen);
+  toggle.classList.toggle("open", summaryOpen);
+
+  // 第一次展開時才生成摘要
+  if (summaryOpen && !summaryGenerated) {
+    summaryGenerated = true;
+    generateSummary();
+  }
+}
+
+async function generateSummary() {
+  const loadEl  = document.getElementById("summaryLoading");
+  const textEl  = document.getElementById("summaryText");
+  const contEl  = document.getElementById("summaryContent");
+  const metaEl  = document.getElementById("summaryMeta");
+  const errEl   = document.getElementById("summaryError");
+  const badge   = document.getElementById("summaryBadge");
+
+  loadEl.style.display = "flex";
+  textEl.style.display = "none";
+  errEl.style.display  = "none";
+
+  // 等新聞資料載入完成
+  let waited = 0;
+  while ((intlData.length === 0 && twData.length === 0) && waited < 20) {
+    await new Promise(r => setTimeout(r, 500));
+    waited++;
+  }
+
+  // 整理新聞標題給 Gemini
+  const intlTitles = intlData.map((n,i) =>
+    `${i+1}. [${n.source}] ${n.zhTitle && n.zhTitle !== n.title ? n.zhTitle : n.title}`
+  ).join("\n");
+
+  const twTitles = twData.map((n,i) =>
+    `${i+1}. [${n.source}] ${n.title}`
+  ).join("\n");
+
+  const today = new Date().toLocaleDateString("zh-TW", {timeZone:"Asia/Taipei"});
+  const prompt = `你是資深財經分析師。以下是 ${today} 的財經新聞標題，請根據這些新聞寫一篇約300字的繁體中文市場摘要。
+
+【國際財經新聞】
+${intlTitles}
+
+【台灣財經新聞】
+${twTitles}
+
+請用流暢的繁體中文，分析今日市場重點，包含：
+1. 全球市場整體狀況
+2. 台灣股市重點
+3. 值得關注的主題或風險
+
+直接輸出摘要內容，不需要標題或前言。`;
+
+  try {
+    const resp = await fetch(GEMINI_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens: 600, temperature: 0.7 }
+      })
+    });
+
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const data = await resp.json();
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+    if (!text) throw new Error("Gemini 回傳空內容");
+
+    loadEl.style.display = "none";
+    contEl.textContent   = text;
+    metaEl.textContent   = "由 Gemini AI 根據今日 " + (intlData.length + twData.length) + " 則新聞生成 · " + today;
+    textEl.style.display = "block";
+    badge.textContent    = "✓ 已生成";
+    badge.style.background = "rgba(34,197,94,0.15)";
+    badge.style.color      = "var(--green)";
+
+  } catch(e) {
+    loadEl.style.display = "none";
+    errEl.textContent    = "⚠ 摘要生成失敗：" + e.message;
+    errEl.style.display  = "block";
+    badge.textContent    = "生成失敗";
+    badge.style.background = "rgba(239,68,68,0.15)";
+    badge.style.color      = "#ef4444";
+  }
+}
 </script>
 
 </body>
