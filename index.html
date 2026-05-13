@@ -181,6 +181,13 @@ font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 5px;
 .news-time { font-size: 10px; color: var(–dim); font-family: var(–mono); }
 .news-link { font-size: 10px; color: var(–dim); margin-left: auto; }
 .news-card:hover .news-link { color: #9ca3af; }
+.news-zh {
+font-size: 12px; color: #94a3b8; margin-top: 4px;
+font-family: var(–sans); line-height: 1.5;
+padding: 4px 8px; border-radius: 6px;
+background: rgba(255,255,255,0.04);
+border-left: 2px solid rgba(96,165,250,0.4);
+}
 
 /* ── Skeleton loading ── */
 .skeleton {
@@ -335,10 +342,11 @@ async function fetchNews(sheetName) {
   const json = await resp.json();
   if (!json.ok) throw new Error(json.error || "API 錯誤");
   return (json.data || []).map(r => ({
-    time:   r["更新時間"] || "",
-    title:  r["標題"]     || "",
-    source: r["來源"]     || "",
-    url:    r["連結"]     || "",
+    time:    r["更新時間"] || "",
+    title:   r["標題"]     || "",
+    zhTitle: r["中文標題"] || "",
+    source:  r["來源"]     || "",
+    url:     r["連結"]     || "",
   })).filter(r => r.title);
 }
 
@@ -362,6 +370,7 @@ function renderNews(listEl, badgeEl, items, accentVar, delay0) {
       <div class="news-num" style="background:${bg};color:${col}">${i + 1}</div>
       <div class="news-body">
         <div class="news-title">${item.title}</div>
+        ${item.zhTitle ? `<div class="news-zh">${item.zhTitle}</div>` : ""}
         <div class="news-meta">
           <span class="news-source" style="background:${bg};color:${col}">${item.source}</span>
           ${item.time ? `<span class="news-time">${item.time.slice(0,16)}</span>` : ""}
