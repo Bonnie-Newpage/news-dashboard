@@ -370,7 +370,7 @@ function renderNews(listEl, badgeEl, items, accentVar, delay0) {
       <div class="news-num" style="background:${bg};color:${col}">${i + 1}</div>
       <div class="news-body">
         <div class="news-title">${item.title}</div>
-        ${item.zhTitle ? `<div class="news-zh">${item.zhTitle}</div>` : ""}
+        ${item.zhTitle && item.zhTitle !== item.title ? `<div class="news-zh">${item.zhTitle}</div>` : ""}
         <div class="news-meta">
           <span class="news-source" style="background:${bg};color:${col}">${item.source}</span>
           ${item.time ? `<span class="news-time">${item.time.slice(0,16)}</span>` : ""}
