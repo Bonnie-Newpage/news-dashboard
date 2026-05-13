@@ -431,18 +431,30 @@ function getSrcColor(name) {
 }
 
 async function fetchNews(sheetName) {
-  const url  = API_URL + "?sheet=" + encodeURIComponent(sheetName);
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error("HTTP " + resp.status);
-  const json = await resp.json();
-  if (!json.ok) throw new Error(json.error || "API 錯誤");
-  return (json.data || []).map(r => ({
-    time:    r["更新時間"] || "",
-    title:   r["標題"]     || "",
-    zhTitle: r["中文標題"] || "",
-    source:  r["來源"]     || "",
-    url:     r["連結"]     || "",
-  })).filter(r => r.title);
+  const url = API_URL + "?sheet=" + encodeURIComponent(sheetName);
+
+  // 20 秒 timeout
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 20000);
+
+  try {
+    const resp = await fetch(url, { signal: controller.signal });
+    clearTimeout(timer);
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const json = await resp.json();
+    if (!json.ok) throw new Error(json.error || "API 錯誤");
+    return (json.data || []).map(r => ({
+      time:    r["更新時間"] || "",
+      title:   r["標題"]     || "",
+      zhTitle: r["中文標題"] || "",
+      source:  r["來源"]     || "",
+      url:     r["連結"]     || "",
+    })).filter(r => r.title);
+  } catch(e) {
+    clearTimeout(timer);
+    if (e.name === "AbortError") throw new Error("載入逾時（Apps Script 冷啟動，請按重新整理再試）");
+    throw e;
+  }
 }
 
 function renderNews(listEl, badgeEl, items, accentVar, delay0) {
