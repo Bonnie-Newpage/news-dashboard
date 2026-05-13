@@ -559,7 +559,7 @@ loadAll();
 // 摘要功能
 // ═══════════════════════════════════════
 const GEMINI_KEY = "AIzaSyDN3LiPmOrrkHVKNLonCxjI0yo4J9v1s7Y";
-const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + GEMINI_KEY;
+const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=" + GEMINI_KEY;
 
 let summaryOpen = false;
 let summaryGenerated = false;
@@ -618,20 +618,11 @@ async function generateSummary() {
   ).join("\n");
 
   const today = new Date().toLocaleDateString("zh-TW", {timeZone:"Asia/Taipei"});
-  const prompt = `你是資深財經分析師。以下是 ${today} 的財經新聞標題，請根據這些新聞寫一篇約300字的繁體中文市場摘要。
+  const prompt = `${today} 財經新聞摘要，請用繁體中文寫約300字分析，直接輸出內容不需標題：
 
-【國際財經新聞】
-${intlTitles}
+國際：${intlTitles}
 
-【台灣財經新聞】
-${twTitles}
-
-請用流暢的繁體中文，分析今日市場重點，包含：
-1. 全球市場整體狀況
-2. 台灣股市重點
-3. 值得關注的主題或風險
-
-直接輸出摘要內容，不需要標題或前言。`;
+台灣：${twTitles}`;
 
   try {
     const resp = await fetch(GEMINI_URL, {
