@@ -150,7 +150,7 @@ function sc(n){return SRC_COL[n]||["#6b7280","rgba(107,114,128,.15)"]}
 
 async function apiFetch(sheet){
   const c=new AbortController();
-  const t=setTimeout(()=>c.abort(),15000);
+  const t=setTimeout(()=>c.abort(),35000);
   try{
     const r=await fetch(API+"?sheet="+encodeURIComponent(sheet),{signal:c.signal});
     clearTimeout(t);
