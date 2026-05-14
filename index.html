@@ -32,11 +32,16 @@
   .stat-lbl{font-size:10px;color:var(--muted)}
   .stat-val{font-size:16px;font-weight:700;font-family:var(--mono)}
   .summary{margin:16px 28px 0;background:linear-gradient(135deg,rgba(167,139,250,.08),rgba(139,92,246,.04));border:1px solid rgba(167,139,250,.2);border-radius:20px;overflow:hidden;animation:fadeUp .4s ease .1s both}
-  .sum-hdr{padding:14px 20px;border-bottom:1px solid rgba(167,139,250,.15);background:rgba(0,0,0,.15);display:flex;justify-content:space-between;align-items:center}
+  .sum-hdr{padding:14px 20px;border-bottom:1px solid rgba(167,139,250,.15);background:rgba(0,0,0,.15);display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none}
+  .sum-hdr:hover{background:rgba(0,0,0,.25)}
   .sum-titl{display:flex;align-items:center;gap:10px}
   .sum-titl span{font-size:15px;font-weight:700;color:#f1f5f9;font-family:var(--serif)}
+  .sum-toggle{font-size:12px;color:var(--purple);font-family:var(--mono);display:flex;align-items:center;gap:6px}
+  .sum-toggle .arrow{transition:transform .3s;display:inline-block}
   .sum-body{padding:18px 22px;font-size:14px;line-height:1.9;color:#cbd5e1;font-family:var(--serif);white-space:pre-wrap}
   .sum-skel{height:100px;border-radius:12px;margin:16px}
+  .sum-content{overflow:hidden;transition:max-height .35s ease, opacity .35s ease;max-height:0;opacity:0}
+  .sum-content.open{max-height:2000px;opacity:1}
   .badge{font-size:10px;padding:2px 10px;border-radius:10px;font-weight:700;white-space:nowrap}
   .b-green{background:rgba(34,197,94,.15);color:var(--green)}
   .b-orange{background:rgba(249,115,22,.15);color:var(--orange)}
@@ -97,11 +102,16 @@
 </div>
 
 <div class="summary">
-  <div class="sum-hdr">
+  <div class="sum-hdr" onclick="toggleSummary()">
     <div class="sum-titl"><span style="font-size:18px">✨</span><span>今日財經市場摘要</span></div>
-    <span class="badge b-load" id="sumBadge">載入中…</span>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="badge b-load" id="sumBadge">載入中…</span>
+      <span class="sum-toggle"><span id="sumArrow" class="arrow">▼</span> 展開</span>
+    </div>
   </div>
-  <div id="sumBody"><div class="skel sum-skel"></div></div>
+  <div class="sum-content" id="sumContent">
+    <div id="sumBody"><div class="skel sum-skel"></div></div>
+  </div>
 </div>
 
 <div class="grid">
@@ -161,6 +171,21 @@ function renderNews(el,bdg,items,delay0){
 
 function skelLoad(el,bdg){el.innerHTML='<div class="skel skel-card"></div><div class="skel skel-card"></div><div class="skel skel-card"></div>';bdg.textContent="載入中…";bdg.className="badge b-load";}
 function setErr(el,bdg,msg){el.innerHTML=`<div class="err-box"><div class="err-ttl">⚠ 無法讀取資料</div><div class="err-msg">${msg}</div></div>`;bdg.textContent="串接失敗";bdg.className="badge b-err";}
+
+function toggleSummary(){
+  const c=document.getElementById("sumContent");
+  const a=document.getElementById("sumArrow");
+  const t=c.classList.contains("open");
+  if(t){
+    c.classList.remove("open");
+    a.style.transform="rotate(0deg)";
+    a.nextSibling.textContent=" 展開";
+  } else {
+    c.classList.add("open");
+    a.style.transform="rotate(180deg)";
+    a.nextSibling.textContent=" 收起";
+  }
+}
 
 async function loadAll(){
   const icon=document.getElementById("refIcon");
