@@ -74,6 +74,11 @@
   .err-msg{color:#fca5a5;font-size:11px;line-height:1.6;font-family:var(--mono)}
   .empty{text-align:center;padding:40px 20px;color:var(--dim);font-size:13px}
   .footer{text-align:center;padding:0 28px;font-size:11px;color:#1f2937}
+  .upd-btn{background:linear-gradient(135deg,rgba(167,139,250,.2),rgba(139,92,246,.15));border:1px solid rgba(167,139,250,.3);border-radius:10px;padding:7px 16px;color:var(--purple);font-size:12px;cursor:pointer;font-family:var(--sans);transition:all .2s;white-space:nowrap}
+  .upd-btn:hover{background:linear-gradient(135deg,rgba(167,139,250,.3),rgba(139,92,246,.25));color:#c4b5fd}
+  .upd-btn:disabled{opacity:.5;cursor:not-allowed}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e1b4b;border:1px solid rgba(167,139,250,.3);border-radius:14px;padding:12px 24px;color:#c4b5fd;font-size:13px;font-family:var(--sans);z-index:999;transition:transform .3s ease,opacity .3s ease;opacity:0;white-space:nowrap}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 </style>
 </head>
 <body>
@@ -91,6 +96,7 @@
     <span class="live-dot"></span>
     <span class="live-lbl">LIVE</span>
     <button class="ref-btn" onclick="loadAll()"><span id="refIcon">⟳</span> 重新整理</button>
+    <button class="upd-btn" id="updBtn" onclick="triggerRefresh()">⚡ 立即更新新聞</button>
   </div>
 </div>
 
@@ -171,6 +177,34 @@ function renderNews(el,bdg,items,delay0){
 
 function skelLoad(el,bdg){el.innerHTML='<div class="skel skel-card"></div><div class="skel skel-card"></div><div class="skel skel-card"></div>';bdg.textContent="載入中…";bdg.className="badge b-load";}
 function setErr(el,bdg,msg){el.innerHTML=`<div class="err-box"><div class="err-ttl">⚠ 無法讀取資料</div><div class="err-msg">${msg}</div></div>`;bdg.textContent="串接失敗";bdg.className="badge b-err";}
+
+function showToast(msg, duration=3000){
+  let t=document.getElementById("toast");
+  if(!t){t=document.createElement("div");t.id="toast";t.className="toast";document.body.appendChild(t);}
+  t.textContent=msg;t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),duration);
+}
+
+async function triggerRefresh(){
+  const btn=document.getElementById("updBtn");
+  btn.disabled=true;
+  btn.textContent="⏳ 更新中，約需1-2分鐘…";
+  showToast("⚡ 正在更新新聞與摘要，請稍候…",60000);
+  try{
+    const r=await fetch(API+"?action=refresh");
+    const j=await r.json();
+    if(j.ok){
+      showToast("✅ 更新完成！重新載入資料中…",3000);
+      setTimeout(()=>loadAll(),1000);
+    } else {
+      showToast("❌ 更新失敗："+j.msg,4000);
+    }
+  }catch(e){
+    showToast("❌ 錯誤："+e.message,4000);
+  }
+  btn.disabled=false;
+  btn.textContent="⚡ 立即更新新聞";
+}
 
 function toggleSummary(){
   const c=document.getElementById("sumContent");
