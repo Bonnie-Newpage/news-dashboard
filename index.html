@@ -189,6 +189,35 @@ background: rgba(255,255,255,0.04);
 border-left: 2px solid rgba(96,165,250,0.4);
 }
 
+/* ── Daily Summary ── */
+.summary-section {
+margin: 16px 28px 0;
+background: linear-gradient(135deg, rgba(167,139,250,0.08), rgba(139,92,246,0.04));
+border: 1px solid rgba(167,139,250,0.2);
+border-radius: 20px; overflow: hidden;
+animation: fadeUp .4s ease both;
+}
+.summary-header {
+padding: 14px 20px;
+border-bottom: 1px solid rgba(167,139,250,0.15);
+background: rgba(0,0,0,0.15);
+display: flex; justify-content: space-between; align-items: center;
+}
+.summary-title-wrap { display: flex; align-items: center; gap: 10px; }
+.summary-title { font-size: 15px; font-weight: 700; color: #f1f5f9; font-family: var(–serif); }
+.summary-body {
+padding: 18px 22px;
+font-size: 14px; line-height: 1.9;
+color: #cbd5e1; font-family: var(–serif);
+white-space: pre-wrap;
+}
+.summary-skeleton {
+height: 120px; border-radius: 12px; margin: 16px;
+}
+@media (max-width: 768px) {
+.summary-section { margin: 12px 16px 0; }
+}
+
 /* ── 摘要卡片 ── */
 .summary-wrap {
 padding: 0 28px 0; margin-bottom: 4px;
@@ -344,6 +373,21 @@ border: 1px solid rgba(239,68,68,0.2);
   </div>
 </div>
 
+<!-- Daily Summary -->
+
+<div class="summary-section" id="summarySection">
+  <div class="summary-header">
+    <div class="summary-title-wrap">
+      <span style="font-size:18px">✨</span>
+      <span class="summary-title">今日財經市場摘要</span>
+    </div>
+    <span class="badge" id="summaryBadge" style="background:rgba(167,139,250,0.15);color:#a78bfa">載入中…</span>
+  </div>
+  <div id="summaryBody">
+    <div class="skeleton summary-skeleton"></div>
+  </div>
+</div>
+
 <!-- Grid -->
 
 <div class="grid">
@@ -423,12 +467,13 @@ async function fetchNews(sheetName) {
     const json = await resp.json();
     if (!json.ok) throw new Error(json.error || "API 錯誤");
     return (json.data || []).map(r => ({
-      time:    r["更新時間"] || "",
-      title:   r["標題"]     || "",
-      zhTitle: r["中文標題"] || "",
-      source:  r["來源"]     || "",
-      url:     r["連結"]     || "",
-    })).filter(r => r.title);
+      time:    r["更新時間"]     || "",
+      title:   r["標題"]         || "",
+      zhTitle: r["中文標題"]     || "",
+      source:  r["來源"]         || "",
+      url:     r["連結"]         || "",
+      summary: r["每日財經摘要"] || "",
+    })).filter(r => r.title || r.summary);
   } catch(e) {
     clearTimeout(timer);
     if (e.name === "AbortError") throw new Error("載入逾時（Apps Script 冷啟動，請按重新整理再試）");
@@ -566,6 +611,26 @@ async function loadAll() {
   document.getElementById("twCount").textContent   = twData.length;
   const srcs = new Set([...intlData, ...twData].map(n => n.source));
   document.getElementById("srcCount").textContent  = srcs.size;
+
+  // 每日摘要
+  fetchNews("每日摘要").then(data => {
+    const item = data[0];
+    const body = document.getElementById("summaryBody");
+    const badge = document.getElementById("summaryBadge");
+    if (item && item["每日財經摘要"]) {
+      body.innerHTML = `<div class="summary-body">${item["每日財經摘要"]}</div>`;
+      badge.textContent = "✓ AI 生成";
+      badge.style.background = "rgba(167,139,250,0.15)";
+      badge.style.color = "#a78bfa";
+    } else {
+      body.innerHTML = `<div class="empty">尚無摘要資料</div>`;
+      badge.textContent = "尚未更新";
+    }
+  }).catch(() => {
+    document.getElementById("summaryBody").innerHTML =
+      `<div class="empty">摘要載入失敗</div>`;
+    document.getElementById("summaryBadge").textContent = "載入失敗";
+  });
 
   btn.classList.remove("loading");
 }
