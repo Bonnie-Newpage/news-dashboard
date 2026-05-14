@@ -8,650 +8,204 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Noto+Sans+TC:wght@400;600;700&family=Noto+Serif+TC:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg:       #070d15;
-    --surface:  rgba(255,255,255,0.03);
-    --border:   rgba(255,255,255,0.07);
-    --text:     #e2e8f0;
-    --muted:    #6b7280;
-    --dim:      #4b5563;
-    --green:    #22c55e;
-    --blue:     #60a5fa;
-    --orange:   #f97316;
-    --mono:     'IBM Plex Mono', monospace;
-    --serif:    'Noto Serif TC', serif;
-    --sans:     'Noto Sans TC', sans-serif;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    min-height: 100vh;
-    padding-bottom: 60px;
-  }
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-thumb { background: #22c55e44; border-radius: 2px; }
-
-/* ── Animations ── */
-@keyframes fadeUp {
-from { opacity: 0; transform: translateY(12px); }
-to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes pulse {
-0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
-50%       { opacity: 0.7; box-shadow: 0 0 0 6px rgba(34,197,94,0); }
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-@keyframes shimmer {
-0%   { background-position: -200% 0; }
-100% { background-position:  200% 0; }
-}
-
-/* ── Header ── */
-.header {
-position: sticky; top: 0; z-index: 100;
-background: rgba(7,13,21,0.96);
-border-bottom: 1px solid var(–border);
-padding: 14px 28px;
-display: flex; align-items: center; justify-content: space-between;
-backdrop-filter: blur(16px);
-gap: 12px;
-}
-.header-left { display: flex; align-items: center; gap: 14px; }
-.logo {
-width: 42px; height: 42px; border-radius: 13px;
-background: linear-gradient(135deg, var(–green), #059669);
-display: flex; align-items: center; justify-content: center;
-font-size: 20px; flex-shrink: 0;
-}
-.header-title { font-size: 16px; font-weight: 800; color: #f8fafc; font-family: var(–serif); letter-spacing: 0.5px; }
-.header-sub   { font-size: 10px; color: var(–muted); margin-top: 2px; }
-.header-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-.live-dot {
-width: 8px; height: 8px; border-radius: 50%;
-background: var(–green);
-animation: pulse 2s infinite;
-display: inline-block;
-}
-.live-label { font-size: 11px; color: var(–green); font-weight: 700; font-family: var(–mono); }
-.refresh-btn {
-background: rgba(255,255,255,0.06);
-border: 1px solid rgba(255,255,255,0.12);
-border-radius: 10px; padding: 7px 16px;
-color: #9ca3af; font-size: 12px; cursor: pointer;
-font-family: var(–sans);
-transition: all .2s;
-display: flex; align-items: center; gap: 6px;
-}
-.refresh-btn:hover { background: rgba(255,255,255,0.1); color: var(–text); }
-.refresh-btn.loading .icon { animation: spin 1s linear infinite; display: inline-block; }
-.update-time { font-size: 11px; color: var(–muted); font-family: var(–mono); }
-
-/* ── Stats ── */
-.stats { padding: 16px 28px 0; display: flex; gap: 12px; flex-wrap: wrap; }
-.stat-card {
-background: var(–surface);
-border: 1px solid var(–border);
-border-radius: 12px; padding: 10px 18px;
-display: flex; align-items: center; gap: 10px;
-animation: fadeUp .4s ease both;
-}
-.stat-emoji { font-size: 16px; }
-.stat-label { font-size: 10px; color: var(–muted); }
-.stat-value { font-size: 16px; font-weight: 700; font-family: var(–mono); }
-
-/* ── Grid ── */
-.grid {
-padding: 16px 28px;
-display: grid;
-grid-template-columns: 1fr 1fr;
-gap: 20px;
-}
-@media (max-width: 768px) {
-.grid { grid-template-columns: 1fr; }
-.header { padding: 12px 16px; }
-.stats  { padding: 12px 16px 0; }
-.grid   { padding: 12px 16px; }
-}
-
-/* ── Column ── */
-.column {
-background: var(–surface);
-border: 1px solid var(–border);
-border-radius: 20px; overflow: hidden;
-display: flex; flex-direction: column;
-}
-.col-header {
-padding: 16px 20px;
-border-bottom: 1px solid var(–border);
-background: rgba(0,0,0,0.2);
-display: flex; justify-content: space-between; align-items: center;
-}
-.col-title-wrap { display: flex; align-items: center; gap: 10px; }
-.col-title { font-size: 15px; font-weight: 700; color: #f1f5f9; font-family: var(–serif); }
-.badge {
-font-size: 10px; padding: 2px 10px; border-radius: 10px;
-font-weight: 700;
-}
-.badge-green  { background: rgba(34,197,94,0.15);  color: var(–green); }
-.badge-orange { background: rgba(249,115,22,0.15); color: var(–orange); }
-.badge-error  { background: rgba(239,68,68,0.15);  color: #ef4444; }
-.badge-loading { background: rgba(251,191,36,0.15); color: #fbbf24; }
-
-/* ── News list ── */
-.news-list {
-padding: 14px 16px;
-display: flex; flex-direction: column; gap: 8px;
-overflow-y: auto; max-height: 520px;
-}
-
-/* ── News card ── */
-.news-card {
-display: flex; gap: 12px; align-items: flex-start;
-padding: 13px 14px; border-radius: 13px;
-text-decoration: none; color: inherit;
-background: rgba(255,255,255,0.03);
-border: 1px solid rgba(255,255,255,0.06);
-transition: background .18s, border-color .18s;
-animation: fadeUp .4s ease both;
-}
-.news-card:hover {
-background: rgba(255,255,255,0.07);
-border-color: rgba(255,255,255,0.15);
-}
-.news-num {
-width: 22px; height: 22px; border-radius: 7px; flex-shrink: 0;
-display: flex; align-items: center; justify-content: center;
-font-size: 10px; font-weight: 700; font-family: var(–mono);
-margin-top: 1px;
-}
-.news-body { flex: 1; min-width: 0; }
-.news-title {
-font-size: 13px; line-height: 1.6;
-font-family: var(–serif); color: #e2e8f0;
-transition: color .15s;
-}
-.news-card:hover .news-title { color: #fff; }
-.news-meta { display: flex; gap: 8px; margin-top: 5px; align-items: center; flex-wrap: wrap; }
-.news-source {
-font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 5px;
-}
-.news-time { font-size: 10px; color: var(–dim); font-family: var(–mono); }
-.news-link { font-size: 10px; color: var(–dim); margin-left: auto; }
-.news-card:hover .news-link { color: #9ca3af; }
-.news-zh {
-font-size: 12px; color: #94a3b8; margin-top: 4px;
-font-family: var(–sans); line-height: 1.5;
-padding: 4px 8px; border-radius: 6px;
-background: rgba(255,255,255,0.04);
-border-left: 2px solid rgba(96,165,250,0.4);
-}
-
-/* ── Daily Summary ── */
-.summary-section {
-margin: 16px 28px 0;
-background: linear-gradient(135deg, rgba(167,139,250,0.08), rgba(139,92,246,0.04));
-border: 1px solid rgba(167,139,250,0.2);
-border-radius: 20px; overflow: hidden;
-animation: fadeUp .4s ease both;
-}
-.summary-header {
-padding: 14px 20px;
-border-bottom: 1px solid rgba(167,139,250,0.15);
-background: rgba(0,0,0,0.15);
-display: flex; justify-content: space-between; align-items: center;
-}
-.summary-title-wrap { display: flex; align-items: center; gap: 10px; }
-.summary-title { font-size: 15px; font-weight: 700; color: #f1f5f9; font-family: var(–serif); }
-.summary-body {
-padding: 18px 22px;
-font-size: 14px; line-height: 1.9;
-color: #cbd5e1; font-family: var(–serif);
-white-space: pre-wrap;
-}
-.summary-skeleton {
-height: 120px; border-radius: 12px; margin: 16px;
-}
-@media (max-width: 768px) {
-.summary-section { margin: 12px 16px 0; }
-}
-
-/* ── 摘要卡片 ── */
-.summary-wrap {
-padding: 0 28px 0; margin-bottom: 4px;
-}
-@media (max-width: 768px) { .summary-wrap { padding: 0 16px; } }
-
-.summary-card {
-background: linear-gradient(135deg, rgba(34,197,94,0.06), rgba(96,165,250,0.06));
-border: 1px solid rgba(34,197,94,0.2);
-border-radius: 18px; overflow: hidden;
-transition: all .3s;
-}
-.summary-header {
-padding: 14px 20px;
-display: flex; justify-content: space-between; align-items: center;
-cursor: pointer; user-select: none;
-}
-.summary-header:hover { background: rgba(255,255,255,0.03); }
-.summary-title-row { display: flex; align-items: center; gap: 10px; }
-.summary-title { font-size: 15px; font-weight: 700; color: #f1f5f9; font-family: var(–serif); }
-.summary-badge {
-font-size: 10px; padding: 2px 8px; border-radius: 8px;
-background: rgba(34,197,94,0.15); color: var(–green); font-weight: 700;
-}
-.summary-toggle { font-size: 12px; color: var(–muted); transition: transform .3s; }
-.summary-toggle.open { transform: rotate(180deg); }
-.summary-body {
-padding: 0 20px 18px;
-display: none;
-}
-.summary-body.open { display: block; animation: fadeUp .3s ease; }
-.summary-text {
-font-size: 14px; line-height: 1.9; color: #cbd5e1;
-font-family: var(–serif); white-space: pre-wrap;
-}
-.summary-loading {
-display: flex; align-items: center; gap: 10px;
-font-size: 13px; color: var(–muted); padding: 4px 0;
-}
-.summary-spinner {
-width: 16px; height: 16px; border-radius: 50%;
-border: 2px solid rgba(34,197,94,0.2);
-border-top-color: var(–green);
-animation: spin 1s linear infinite; flex-shrink: 0;
-}
-.summary-error { font-size: 12px; color: #ef4444; padding: 4px 0; }
-.summary-meta { font-size: 10px; color: var(–dim); margin-top: 10px; font-family: var(–mono); }
-
-/* ── Skeleton loading ── */
-.skeleton {
-background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
-background-size: 200% 100%;
-animation: shimmer 1.5s infinite;
-border-radius: 8px;
-}
-.skeleton-card { height: 72px; border-radius: 13px; margin-bottom: 8px; }
-
-/* ── Error ── */
-.error-box {
-margin: 8px; padding: 16px; border-radius: 12px;
-background: rgba(239,68,68,0.08);
-border: 1px solid rgba(239,68,68,0.2);
-}
-.error-title { color: #ef4444; font-weight: 700; font-size: 12px; margin-bottom: 6px; }
-.error-msg   { color: #fca5a5; font-size: 11px; line-height: 1.6; font-family: var(–mono); }
-
-/* ── Empty ── */
-.empty { text-align: center; padding: 40px 20px; color: var(–dim); font-size: 13px; }
-
-/* ── Footer ── */
-.footer { text-align: center; padding: 0 28px; font-size: 11px; color: #1f2937; }
+  :root { --bg:#070d15; --sur:rgba(255,255,255,0.03); --bdr:rgba(255,255,255,0.07); --text:#e2e8f0; --muted:#6b7280; --dim:#4b5563; --green:#22c55e; --blue:#60a5fa; --orange:#f97316; --purple:#a78bfa; --mono:'IBM Plex Mono',monospace; --serif:'Noto Serif TC',serif; --sans:'Noto Sans TC',sans-serif; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:var(--sans); min-height:100vh; padding-bottom:60px; }
+  ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-thumb{background:#22c55e44;border-radius:2px}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(34,197,94,.4)}50%{opacity:.7;box-shadow:0 0 0 6px rgba(34,197,94,0)}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+  .hdr{position:sticky;top:0;z-index:100;background:rgba(7,13,21,.96);border-bottom:1px solid var(--bdr);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(16px);gap:12px}
+  .hdr-l{display:flex;align-items:center;gap:14px}
+  .logo{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,var(--green),#059669);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+  .hdr-title{font-size:16px;font-weight:800;color:#f8fafc;font-family:var(--serif)}
+  .hdr-sub{font-size:10px;color:var(--muted);margin-top:2px}
+  .hdr-r{display:flex;align-items:center;gap:12px;flex-shrink:0}
+  .live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;display:inline-block}
+  .live-lbl{font-size:11px;color:var(--green);font-weight:700;font-family:var(--mono)}
+  .upd-time{font-size:11px;color:var(--muted);font-family:var(--mono)}
+  .ref-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:7px 16px;color:#9ca3af;font-size:12px;cursor:pointer;font-family:var(--sans);transition:all .2s;display:flex;align-items:center;gap:6px}
+  .ref-btn:hover{background:rgba(255,255,255,.1);color:var(--text)}
+  .stats{padding:16px 28px 0;display:flex;gap:12px;flex-wrap:wrap}
+  .stat{background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:10px 18px;display:flex;align-items:center;gap:10px;animation:fadeUp .4s ease both}
+  .stat-lbl{font-size:10px;color:var(--muted)}
+  .stat-val{font-size:16px;font-weight:700;font-family:var(--mono)}
+  .summary{margin:16px 28px 0;background:linear-gradient(135deg,rgba(167,139,250,.08),rgba(139,92,246,.04));border:1px solid rgba(167,139,250,.2);border-radius:20px;overflow:hidden;animation:fadeUp .4s ease .1s both}
+  .sum-hdr{padding:14px 20px;border-bottom:1px solid rgba(167,139,250,.15);background:rgba(0,0,0,.15);display:flex;justify-content:space-between;align-items:center}
+  .sum-titl{display:flex;align-items:center;gap:10px}
+  .sum-titl span{font-size:15px;font-weight:700;color:#f1f5f9;font-family:var(--serif)}
+  .sum-body{padding:18px 22px;font-size:14px;line-height:1.9;color:#cbd5e1;font-family:var(--serif);white-space:pre-wrap}
+  .sum-skel{height:100px;border-radius:12px;margin:16px}
+  .badge{font-size:10px;padding:2px 10px;border-radius:10px;font-weight:700;white-space:nowrap}
+  .b-green{background:rgba(34,197,94,.15);color:var(--green)}
+  .b-orange{background:rgba(249,115,22,.15);color:var(--orange)}
+  .b-purple{background:rgba(167,139,250,.15);color:var(--purple)}
+  .b-load{background:rgba(251,191,36,.15);color:#fbbf24}
+  .b-err{background:rgba(239,68,68,.15);color:#ef4444}
+  .grid{padding:16px 28px;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:768px){.grid{grid-template-columns:1fr}.hdr,.stats{padding-left:16px;padding-right:16px}.summary{margin-left:16px;margin-right:16px}.grid{padding:12px 16px}}
+  .col{background:var(--sur);border:1px solid var(--bdr);border-radius:20px;overflow:hidden;display:flex;flex-direction:column}
+  .col-hdr{padding:16px 20px;border-bottom:1px solid var(--bdr);background:rgba(0,0,0,.2);display:flex;justify-content:space-between;align-items:center}
+  .col-ttl{display:flex;align-items:center;gap:10px}
+  .col-ttl span{font-size:15px;font-weight:700;color:#f1f5f9;font-family:var(--serif)}
+  .news-list{padding:14px 16px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;max-height:520px}
+  .card{display:flex;gap:12px;align-items:flex-start;padding:13px 14px;border-radius:13px;text-decoration:none;color:inherit;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);transition:background .18s,border-color .18s;animation:fadeUp .4s ease both}
+  .card:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.15)}
+  .card-num{width:22px;height:22px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:var(--mono);margin-top:1px}
+  .card-body{flex:1;min-width:0}
+  .card-title{font-size:13px;line-height:1.6;font-family:var(--serif);color:#e2e8f0;transition:color .15s}
+  .card:hover .card-title{color:#fff}
+  .card-zh{font-size:12px;color:#94a3b8;margin-top:4px;font-family:var(--sans);line-height:1.5;padding:4px 8px;border-radius:6px;background:rgba(255,255,255,.04);border-left:2px solid rgba(96,165,250,.4)}
+  .card-meta{display:flex;gap:8px;margin-top:5px;align-items:center;flex-wrap:wrap}
+  .src-tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px}
+  .card-time{font-size:10px;color:var(--dim);font-family:var(--mono)}
+  .card-link{font-size:10px;color:var(--dim);margin-left:auto}
+  .card:hover .card-link{color:#9ca3af}
+  .skel{background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.08) 50%,rgba(255,255,255,.04) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
+  .skel-card{height:72px;border-radius:13px;margin-bottom:8px}
+  .err-box{margin:8px;padding:16px;border-radius:12px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2)}
+  .err-ttl{color:#ef4444;font-weight:700;font-size:12px;margin-bottom:6px}
+  .err-msg{color:#fca5a5;font-size:11px;line-height:1.6;font-family:var(--mono)}
+  .empty{text-align:center;padding:40px 20px;color:var(--dim);font-size:13px}
+  .footer{text-align:center;padding:0 28px;font-size:11px;color:#1f2937}
 </style>
-
 </head>
 <body>
 
-<!-- Header -->
-
-<div class="header">
-  <div class="header-left">
+<div class="hdr">
+  <div class="hdr-l">
     <div class="logo">📰</div>
     <div>
-      <div class="header-title">每日財經新聞儀表板</div>
-      <div class="header-sub">每天早上 8:00 自動更新 · 資料來源：Google 試算表</div>
+      <div class="hdr-title">每日財經新聞儀表板</div>
+      <div class="hdr-sub">每天早上 8:00 自動更新 · 資料來源：Google 試算表</div>
     </div>
   </div>
-  <div class="header-right">
-    <span id="updateTime" class="update-time" style="display:none"></span>
+  <div class="hdr-r">
+    <span id="updTime" class="upd-time" style="display:none"></span>
     <span class="live-dot"></span>
-    <span class="live-label">LIVE</span>
-    <button class="refresh-btn" onclick="loadAll()">
-      <span class="icon">⟳</span> 重新整理
-    </button>
+    <span class="live-lbl">LIVE</span>
+    <button class="ref-btn" onclick="loadAll()"><span id="refIcon">⟳</span> 重新整理</button>
   </div>
 </div>
-
-<!-- Stats -->
 
 <div class="stats">
-  <div class="stat-card" style="animation-delay:.0s">
-    <span class="stat-emoji">🌐</span>
-    <div>
-      <div class="stat-label">國際新聞</div>
-      <div class="stat-value" id="intlCount" style="color:var(--blue)">—</div>
-    </div>
-  </div>
-  <div class="stat-card" style="animation-delay:.05s">
-    <span class="stat-emoji">🇹🇼</span>
-    <div>
-      <div class="stat-label">台灣新聞</div>
-      <div class="stat-value" id="twCount" style="color:var(--orange)">—</div>
-    </div>
-  </div>
-  <div class="stat-card" style="animation-delay:.1s">
-    <span class="stat-emoji">📡</span>
-    <div>
-      <div class="stat-label">新聞來源</div>
-      <div class="stat-value" id="srcCount" style="color:var(--green)">—</div>
-    </div>
-  </div>
-  <div class="stat-card" style="animation-delay:.15s">
-    <span class="stat-emoji">📅</span>
-    <div>
-      <div class="stat-label">今日日期</div>
-      <div class="stat-value" id="todayDate" style="color:#a78bfa">—</div>
-    </div>
-  </div>
+  <div class="stat" style="animation-delay:.0s"><span style="font-size:16px">🌐</span><div><div class="stat-lbl">國際新聞</div><div class="stat-val" id="cntIntl" style="color:var(--blue)">—</div></div></div>
+  <div class="stat" style="animation-delay:.05s"><span style="font-size:16px">🇹🇼</span><div><div class="stat-lbl">台灣新聞</div><div class="stat-val" id="cntTw" style="color:var(--orange)">—</div></div></div>
+  <div class="stat" style="animation-delay:.1s"><span style="font-size:16px">📡</span><div><div class="stat-lbl">新聞來源</div><div class="stat-val" id="cntSrc" style="color:var(--green)">—</div></div></div>
+  <div class="stat" style="animation-delay:.15s"><span style="font-size:16px">📅</span><div><div class="stat-lbl">今日日期</div><div class="stat-val" id="todayD" style="color:var(--purple)">—</div></div></div>
 </div>
 
-<!-- Summary -->
-
-<div class="summary-wrap">
-  <div class="summary-card">
-    <div class="summary-header" onclick="toggleSummary()">
-      <div class="summary-title-row">
-        <span style="font-size:18px">📊</span>
-        <span class="summary-title">今日財經市場摘要</span>
-        <span class="summary-badge" id="summaryBadge">AI 生成</span>
-      </div>
-      <span class="summary-toggle" id="summaryToggle">▼</span>
-    </div>
-    <div class="summary-body" id="summaryBody">
-      <div class="summary-loading" id="summaryLoading">
-        <div class="summary-spinner"></div>
-        <span>載入摘要中…</span>
-      </div>
-      <div id="summaryText" style="display:none">
-        <div class="summary-text" id="summaryContent"></div>
-        <div class="summary-meta" id="summaryMeta"></div>
-      </div>
-      <div class="summary-error" id="summaryError" style="display:none"></div>
-    </div>
+<div class="summary">
+  <div class="sum-hdr">
+    <div class="sum-titl"><span style="font-size:18px">✨</span><span>今日財經市場摘要</span></div>
+    <span class="badge b-load" id="sumBadge">載入中…</span>
   </div>
+  <div id="sumBody"><div class="skel sum-skel"></div></div>
 </div>
-
-<!-- Daily Summary -->
-
-<div class="summary-section" id="summarySection">
-  <div class="summary-header">
-    <div class="summary-title-wrap">
-      <span style="font-size:18px">✨</span>
-      <span class="summary-title">今日財經市場摘要</span>
-    </div>
-    <span class="badge" id="summaryBadge" style="background:rgba(167,139,250,0.15);color:#a78bfa">載入中…</span>
-  </div>
-  <div id="summaryBody">
-    <div class="skeleton summary-skeleton"></div>
-  </div>
-</div>
-
-<!-- Grid -->
 
 <div class="grid">
-  <!-- 國際新聞欄 -->
-  <div class="column" id="intlCol">
-    <div class="col-header">
-      <div class="col-title-wrap">
-        <span style="font-size:18px">🌐</span>
-        <span class="col-title">國際財經新聞</span>
-      </div>
-      <span class="badge badge-loading" id="intlBadge">載入中…</span>
+  <div class="col">
+    <div class="col-hdr">
+      <div class="col-ttl"><span style="font-size:18px">🌐</span><span>國際財經新聞</span></div>
+      <span class="badge b-load" id="bdgIntl">載入中…</span>
     </div>
-    <div class="news-list" id="intlList">
-      <div class="skeleton skeleton-card"></div>
-      <div class="skeleton skeleton-card"></div>
-      <div class="skeleton skeleton-card"></div>
+    <div class="news-list" id="lstIntl">
+      <div class="skel skel-card"></div><div class="skel skel-card"></div><div class="skel skel-card"></div>
     </div>
   </div>
-
-  <!-- 台灣新聞欄 -->
-
-  <div class="column" id="twCol">
-    <div class="col-header">
-      <div class="col-title-wrap">
-        <span style="font-size:18px">🇹🇼</span>
-        <span class="col-title">台灣財經新聞</span>
-      </div>
-      <span class="badge badge-loading" id="twBadge">載入中…</span>
+  <div class="col">
+    <div class="col-hdr">
+      <div class="col-ttl"><span style="font-size:18px">🇹🇼</span><span>台灣財經新聞</span></div>
+      <span class="badge b-load" id="bdgTw">載入中…</span>
     </div>
-    <div class="news-list" id="twList">
-      <div class="skeleton skeleton-card"></div>
-      <div class="skeleton skeleton-card"></div>
-      <div class="skeleton skeleton-card"></div>
+    <div class="news-list" id="lstTw">
+      <div class="skel skel-card"></div><div class="skel skel-card"></div><div class="skel skel-card"></div>
     </div>
   </div>
 </div>
 
-<div class="footer">
-  資料來源：Google 試算表 · Apps Script 每天 08:00 自動抓取 · 點擊新聞標題開啟原文
-</div>
+<div class="footer">資料來源：Google 試算表 · Apps Script 每天 08:00 自動抓取 · 點擊新聞標題開啟原文</div>
 
 <script>
-// ═══════════════════════════════════════
-// 設定：你的 Apps Script Web App 網址
-// ═══════════════════════════════════════
-const API_URL = "https://script.google.com/macros/s/AKfycbyUP2QLLiy135FUk8alTCfcRDb6nRn2qeDArqIEXSUgTXY9p2Z2eyhm8X_yWe2EcsVV/exec";
+const API="https://script.google.com/macros/s/AKfycbyUP2QLLiy135FUk8alTCfcRDb6nRn2qeDArqIEXSUgTXY9p2Z2eyhm8X_yWe2EcsVV/exec";
+const SRC_COL={"Reuters":["#ff8c00","rgba(255,140,0,.15)"],"CNBC Finance":["#005594","rgba(0,85,148,.2)"],"Bloomberg Markets":["#2563eb","rgba(37,99,235,.15)"],"WSJ Markets":["#c41e3a","rgba(196,30,58,.15)"],"Financial Times":["#c8a84b","rgba(200,168,75,.15)"],"Yahoo奇摩財經":["#6001d2","rgba(96,1,210,.15)"],"經濟日報":["#d97706","rgba(217,119,6,.15)"],"工商時報":["#059669","rgba(5,150,105,.15)"],"鉅亨網":["#0891b2","rgba(8,145,178,.15)"],"MoneyDJ":["#7c3aed","rgba(124,58,237,.15)"],"台灣財經綜合":["#be185d","rgba(190,24,93,.15)"]};
+function sc(n){return SRC_COL[n]||["#6b7280","rgba(107,114,128,.15)"]}
 
-const SOURCE_COLORS = {
-  "Reuters":           ["#ff8c00", "rgba(255,140,0,0.15)"],
-  "CNBC Finance":      ["#005594", "rgba(0,85,148,0.2)"],
-  "Bloomberg Markets": ["#2563eb", "rgba(37,99,235,0.15)"],
-  "WSJ Markets":       ["#c41e3a", "rgba(196,30,58,0.15)"],
-  "Financial Times":   ["#c8a84b", "rgba(200,168,75,0.15)"],
-  "Yahoo奇摩財經":     ["#6001d2", "rgba(96,1,210,0.15)"],
-  "經濟日報":          ["#d97706", "rgba(217,119,6,0.15)"],
-  "工商時報":          ["#059669", "rgba(5,150,105,0.15)"],
-  "鉅亨網":            ["#0891b2", "rgba(8,145,178,0.15)"],
-  "MoneyDJ":           ["#7c3aed", "rgba(124,58,237,0.15)"],
-  "台灣財經綜合":      ["#be185d", "rgba(190,24,93,0.15)"],
-};
-
-function getSrcColor(name) {
-  return SOURCE_COLORS[name] || ["#6b7280", "rgba(107,114,128,0.15)"];
+async function apiFetch(sheet){
+  const c=new AbortController();
+  const t=setTimeout(()=>c.abort(),15000);
+  try{
+    const r=await fetch(API+"?sheet="+encodeURIComponent(sheet),{signal:c.signal});
+    clearTimeout(t);
+    if(!r.ok)throw new Error("HTTP "+r.status);
+    const j=await r.json();
+    if(!j.ok)throw new Error(j.error||"API錯誤");
+    return j.data||[];
+  }catch(e){clearTimeout(t);if(e.name==="AbortError")throw new Error("載入逾時，請按重新整理");throw e;}
 }
 
-async function fetchNews(sheetName) {
-  const url = API_URL + "?sheet=" + encodeURIComponent(sheetName);
-
-  // 20 秒 timeout
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 20000);
-
-  try {
-    const resp = await fetch(url, { signal: controller.signal });
-    clearTimeout(timer);
-    if (!resp.ok) throw new Error("HTTP " + resp.status);
-    const json = await resp.json();
-    if (!json.ok) throw new Error(json.error || "API 錯誤");
-    return (json.data || []).map(r => ({
-      time:    r["更新時間"]     || "",
-      title:   r["標題"]         || "",
-      zhTitle: r["中文標題"]     || "",
-      source:  r["來源"]         || "",
-      url:     r["連結"]         || "",
-      summary: r["每日財經摘要"] || "",
-    })).filter(r => r.title || r.summary);
-  } catch(e) {
-    clearTimeout(timer);
-    if (e.name === "AbortError") throw new Error("載入逾時（Apps Script 冷啟動，請按重新整理再試）");
-    throw e;
-  }
-}
-
-function renderNews(listEl, badgeEl, items, accentVar, delay0) {
-  listEl.innerHTML = "";
-  if (items.length === 0) {
-    listEl.innerHTML = '<div class="empty">尚無資料<br><small>請等待每日早上 8:00 自動更新</small></div>';
-    return;
-  }
-  items.forEach((item, i) => {
-    const [col, bg] = getSrcColor(item.source);
-    let url = item.url || "";
-
-    const card = document.createElement("a");
-    card.className = "news-card";
-    card.href      = url || "#";
-    if (url) { card.target = "_blank"; card.rel = "noopener noreferrer"; }
-    card.style.animationDelay = (delay0 + i * 0.05) + "s";
-
-    card.innerHTML = `
-      <div class="news-num" style="background:${bg};color:${col}">${i + 1}</div>
-      <div class="news-body">
-        <div class="news-title">${item.title}</div>
-        ${item.zhTitle && item.zhTitle !== item.title ? `<div class="news-zh">${item.zhTitle}</div>` : ""}
-        <div class="news-meta">
-          <span class="news-source" style="background:${bg};color:${col}">${item.source}</span>
-          ${item.time ? `<span class="news-time">${item.time.slice(0,16)}</span>` : ""}
-          ${url ? '<span class="news-link">點擊開啟 →</span>' : ""}
-        </div>
-      </div>`;
-    listEl.appendChild(card);
+function renderNews(el,bdg,items,delay0){
+  el.innerHTML="";
+  if(!items.length){el.innerHTML='<div class="empty">尚無資料<br><small>請等待每日早上 8:00 自動更新</small></div>';return;}
+  items.forEach((item,i)=>{
+    const[col,bg]=sc(item.source);
+    const a=document.createElement("a");
+    a.className="card";a.href=item.url||"#";
+    if(item.url){a.target="_blank";a.rel="noopener noreferrer";}
+    a.style.animationDelay=(delay0+i*.05)+"s";
+    a.innerHTML=`<div class="card-num" style="background:${bg};color:${col}">${i+1}</div><div class="card-body"><div class="card-title">${item.title}</div>${item.zhTitle&&item.zhTitle!==item.title?`<div class="card-zh">${item.zhTitle}</div>`:""}<div class="card-meta"><span class="src-tag" style="background:${bg};color:${col}">${item.source}</span>${item.time?`<span class="card-time">${item.time.slice(0,16)}</span>`:""} ${item.url?'<span class="card-link">點擊開啟 →</span>':""}</div></div>`;
+    el.appendChild(a);
   });
 }
 
-function setLoading(listEl, badgeEl) {
-  listEl.innerHTML = `
-    <div class="skeleton skeleton-card"></div>
-    <div class="skeleton skeleton-card"></div>
-    <div class="skeleton skeleton-card"></div>`;
-  badgeEl.textContent = "載入中…";
-  badgeEl.className   = "badge badge-loading";
-}
+function skelLoad(el,bdg){el.innerHTML='<div class="skel skel-card"></div><div class="skel skel-card"></div><div class="skel skel-card"></div>';bdg.textContent="載入中…";bdg.className="badge b-load";}
+function setErr(el,bdg,msg){el.innerHTML=`<div class="err-box"><div class="err-ttl">⚠ 無法讀取資料</div><div class="err-msg">${msg}</div></div>`;bdg.textContent="串接失敗";bdg.className="badge b-err";}
 
-function setError(listEl, badgeEl, msg) {
-  listEl.innerHTML = `
-    <div class="error-box">
-      <div class="error-title">⚠ 無法讀取資料</div>
-      <div class="error-msg">${msg}</div>
-    </div>`;
-  badgeEl.textContent = "串接失敗";
-  badgeEl.className   = "badge badge-error";
-}
+async function loadAll(){
+  const icon=document.getElementById("refIcon");
+  icon.style.animation="spin 1s linear infinite";icon.style.display="inline-block";
+  const lstI=document.getElementById("lstIntl"),bdgI=document.getElementById("bdgIntl");
+  const lstT=document.getElementById("lstTw"),bdgT=document.getElementById("bdgTw");
+  const sumB=document.getElementById("sumBody"),sumBdg=document.getElementById("sumBadge");
+  skelLoad(lstI,bdgI);skelLoad(lstT,bdgT);
+  sumB.innerHTML='<div class="skel sum-skel"></div>';sumBdg.textContent="載入中…";sumBdg.className="badge b-load";
+  document.getElementById("todayD").textContent=new Date().toLocaleDateString("zh-TW",{timeZone:"Asia/Taipei"});
 
-let intlData = [], twData = [];
-
-async function loadAll() {
-  const btn = document.querySelector(".refresh-btn");
-  btn.classList.add("loading");
-
-  const intlList  = document.getElementById("intlList");
-  const twList    = document.getElementById("twList");
-  const intlBadge = document.getElementById("intlBadge");
-  const twBadge   = document.getElementById("twBadge");
-
-  setLoading(intlList, intlBadge);
-  setLoading(twList,   twBadge);
-
-  // 今日日期
-  document.getElementById("todayDate").textContent =
-    new Date().toLocaleDateString("zh-TW", { timeZone: "Asia/Taipei" });
-
-  const [intlRes, twRes, summaryRes] = await Promise.allSettled([
-    fetchNews("國際新聞"),
-    fetchNews("台灣新聞"),
-    fetchNews("每日摘要"),
-  ]);
+  const[rI,rT,rS]=await Promise.allSettled([apiFetch("國際新聞"),apiFetch("台灣新聞"),apiFetch("每日摘要")]);
 
   // 國際新聞
-  if (intlRes.status === "fulfilled") {
-    intlData = intlRes.value;
-    renderNews(intlList, intlBadge, intlData, "--blue", 0);
-    intlBadge.textContent = "✓ " + intlData.length + " 則";
-    intlBadge.className   = "badge badge-green";
-    if (intlData[0]?.time) {
-      const t = document.getElementById("updateTime");
-      t.textContent = "最後更新：" + intlData[0].time.slice(0,16);
-      t.style.display = "";
-    }
-  } else {
-    setError(intlList, intlBadge, intlRes.reason?.message || "未知錯誤");
-  }
+  if(rI.status==="fulfilled"){
+    const items=rI.value.map(r=>({time:r["更新時間"]||"",title:r["標題"]||"",zhTitle:r["中文標題"]||"",source:r["來源"]||"",url:r["連結"]||""})).filter(r=>r.title);
+    renderNews(lstI,bdgI,items,0);
+    bdgI.textContent="✓ "+items.length+" 則";bdgI.className="badge b-green";
+    document.getElementById("cntIntl").textContent=items.length;
+    if(items[0]?.time){const t=document.getElementById("updTime");t.textContent="最後更新："+items[0].time.slice(0,16);t.style.display="";}
+    // sources
+    const srcs=new Set(items.map(n=>n.source));
+    if(rT.status==="fulfilled"){const tItems=rT.value.filter(r=>r["標題"]);tItems.forEach(r=>srcs.add(r["來源"]||""));}
+    document.getElementById("cntSrc").textContent=srcs.size;
+  }else{setErr(lstI,bdgI,rI.reason?.message||"未知錯誤");document.getElementById("cntIntl").textContent=0;}
 
   // 台灣新聞
-  if (twRes.status === "fulfilled") {
-    twData = twRes.value;
-    renderNews(twList, twBadge, twData, "--orange", 0.1);
-    twBadge.textContent = "✓ " + twData.length + " 則";
-    twBadge.className   = "badge badge-orange";
-  } else {
-    setError(twList, twBadge, twRes.reason?.message || "未知錯誤");
-  }
-
-  // 摘要
-  const summaryLoading = document.getElementById("summaryLoading");
-  const summaryText    = document.getElementById("summaryText");
-  const summaryContent = document.getElementById("summaryContent");
-  const summaryMeta    = document.getElementById("summaryMeta");
-  const summaryError   = document.getElementById("summaryError");
-  const summaryBadge   = document.getElementById("summaryBadge");
-
-  if (summaryRes.status === "fulfilled" && summaryRes.value.length > 0) {
-    const s = summaryRes.value[0];
-    summaryLoading.style.display = "none";
-    summaryContent.textContent   = s["摘要內容"] || "";
-    summaryMeta.textContent      = "由 Gemini AI 生成 · " + (s["更新時間"] || "").slice(0,16);
-    summaryText.style.display    = "block";
-    summaryBadge.textContent     = "✓ 已生成";
-    summaryBadge.style.background = "rgba(34,197,94,0.15)";
-    summaryBadge.style.color      = "var(--green)";
-  } else {
-    summaryLoading.style.display = "none";
-    summaryError.textContent     = "⚠ 今日摘要尚未生成（每天 8:00 自動更新）";
-    summaryError.style.display   = "block";
-    summaryBadge.textContent     = "待更新";
-    summaryBadge.style.background = "rgba(251,191,36,0.15)";
-    summaryBadge.style.color      = "#fbbf24";
-  }
-
-  // 統計
-  document.getElementById("intlCount").textContent = intlData.length;
-  document.getElementById("twCount").textContent   = twData.length;
-  const srcs = new Set([...intlData, ...twData].map(n => n.source));
-  document.getElementById("srcCount").textContent  = srcs.size;
+  if(rT.status==="fulfilled"){
+    const items=rT.value.map(r=>({time:r["更新時間"]||"",title:r["標題"]||"",zhTitle:r["中文標題"]||"",source:r["來源"]||"",url:r["連結"]||""})).filter(r=>r.title);
+    renderNews(lstT,bdgT,items,0.1);
+    bdgT.textContent="✓ "+items.length+" 則";bdgT.className="badge b-orange";
+    document.getElementById("cntTw").textContent=items.length;
+  }else{setErr(lstT,bdgT,rT.reason?.message||"未知錯誤");document.getElementById("cntTw").textContent=0;}
 
   // 每日摘要
-  fetchNews("每日摘要").then(data => {
-    const item = data[0];
-    const body = document.getElementById("summaryBody");
-    const badge = document.getElementById("summaryBadge");
-    if (item && item["每日財經摘要"]) {
-      body.innerHTML = `<div class="summary-body">${item["每日財經摘要"]}</div>`;
-      badge.textContent = "✓ AI 生成";
-      badge.style.background = "rgba(167,139,250,0.15)";
-      badge.style.color = "#a78bfa";
-    } else {
-      body.innerHTML = `<div class="empty">尚無摘要資料</div>`;
-      badge.textContent = "尚未更新";
-    }
-  }).catch(() => {
-    document.getElementById("summaryBody").innerHTML =
-      `<div class="empty">摘要載入失敗</div>`;
-    document.getElementById("summaryBadge").textContent = "載入失敗";
-  });
+  if(rS.status==="fulfilled"){
+    const row=rS.value[0];
+    const txt=row?.["每日財經摘要"]||"";
+    if(txt){sumB.innerHTML=`<div class="sum-body">${txt}</div>`;sumBdg.textContent="✓ AI 生成";sumBdg.className="badge b-purple";}
+    else{sumB.innerHTML='<div class="empty">今日摘要尚未生成<br><small>每天 8:00 自動更新，或手動執行 Apps Script</small></div>';sumBdg.textContent="尚未更新";sumBdg.className="badge b-load";}
+  }else{sumB.innerHTML='<div class="empty">摘要載入失敗</div>';sumBdg.textContent="載入失敗";sumBdg.className="badge b-err";}
 
-  btn.classList.remove("loading");
+  icon.style.animation="";
 }
-
-// 自動載入
 loadAll();
-
-// ═══════════════════════════════════════
-// 摘要功能（從試算表讀取）
-// ═══════════════════════════════════════
-let summaryOpen = false;
-
-function toggleSummary() {
-  summaryOpen = !summaryOpen;
-  const body   = document.getElementById("summaryBody");
-  const toggle = document.getElementById("summaryToggle");
-  body.classList.toggle("open", summaryOpen);
-  toggle.classList.toggle("open", summaryOpen);
-}
-
-
 </script>
 
 </body>
