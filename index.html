@@ -168,7 +168,15 @@ function renderSummary(rows){
     .replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>")
     .replace(/\n/g,"<br>");
   body.innerHTML=html;
-  date.textContent=time?"更新於 "+time.slice(0,16):"";
+  // 格式化時間：確保顯示 yyyy-MM-dd HH:mm
+  let dispTime="";
+  if(time){
+    // time 可能是 "2026-05-18 08:00" 或其他格式
+    const m=time.match(/(\d{4}[\-\/]\d{1,2}[\-\/]\d{1,2}).?(\d{2}:\d{2})/);
+    if(m)dispTime=m[1].replace(/\//g,"-")+" "+m[2];
+    else dispTime=time.slice(0,16);
+  }
+  date.textContent=dispTime?"更新於 "+dispTime:"";
   badge.textContent="✓ Claude AI 生成";badge.className="badge b-purple";
 }
 
@@ -213,7 +221,7 @@ async function loadAll(){
     renderNews(iL,iB,iR.value,"b-green");
     document.getElementById("iCnt").textContent=iR.value.length;
     const t=iR.value[0]?.["更新時間"];
-    if(t){const el=document.getElementById("updT");el.textContent="最後更新："+t.slice(0,16);el.style.display="";}
+    if(t){const el=document.getElementById("updT");el.textContent="最後更新："+t.slice(0,16).replace("T"," ");el.style.display="";}
   }else{
     iL.innerHTML=`<div class="err-box"><div class="err-t">⚠ 無法讀取</div><div class="err-m">${iR.reason?.message}</div></div>`;
     iB.textContent="失敗";iB.className="badge b-err";
