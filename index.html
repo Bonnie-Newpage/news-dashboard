@@ -221,7 +221,14 @@ async function loadAll(){
     renderNews(iL,iB,iR.value,"b-green");
     document.getElementById("iCnt").textContent=iR.value.length;
     const t=iR.value[0]?.["更新時間"];
-    if(t){const el=document.getElementById("updT");el.textContent="最後更新："+t.slice(0,16).replace("T"," ");el.style.display="";}
+    if(t){
+      const el=document.getElementById("updT");
+      // 直接取試算表格式 "2026-05-18 08:00"，確保顯示到分鐘
+      const m=t.match(/(\d{4}[-\/]\d{1,2}[-\/]\d{1,2}).?(\d{2}:\d{2})/);
+      const dispT=m?(m[1].replace(/\//g,"-")+" "+m[2]):t.slice(0,16);
+      el.textContent="最後更新："+dispT;
+      el.style.display="";
+    }
   }else{
     iL.innerHTML=`<div class="err-box"><div class="err-t">⚠ 無法讀取</div><div class="err-m">${iR.reason?.message}</div></div>`;
     iB.textContent="失敗";iB.className="badge b-err";
